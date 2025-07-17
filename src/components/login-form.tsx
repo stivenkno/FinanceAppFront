@@ -14,7 +14,8 @@ import { useState } from "react";
 
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { setAuthToken } from "@/apiInstance/apiInstance";
+import apiInstance, { setAuthToken } from "@/apiInstance/apiInstance";
+import { useFinance } from "@/context/dashboardContext";
 
 export function LoginForm({
   className,
@@ -25,6 +26,28 @@ export function LoginForm({
     email: "",
     password: "",
   });
+
+  const { totalIngresos, totalEgresos, actualBalance, setContextDashboard } =
+    useFinance();
+
+  const fetchFinanceData = async () => {
+    try {
+      const response1 = await apiInstance.get("/dashboard/balance");
+      const response2 = await apiInstance.get("/dashboard/ingresos");
+      const response3 = await apiInstance.get("/dashboard/gastos");
+
+      const balance = response1.data.balance;
+      const ingresos = response2.data.total_ingresos;
+      const egresos = response3.data.total_gastos;
+
+      console.log("Balance:", balance);
+      console.log("Ingresos:", ingresos);
+      console.log("Egresos:", egresos);
+      setContextDashboard(ingresos, egresos, balance);
+    } catch (error) {
+      console.error("Error fetching finance data:", error);
+    }
+  };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -50,6 +73,9 @@ export function LoginForm({
       console.log(response.data.token);
     }
     console.log(response);
+
+    await fetchFinanceData();
+
     router.push("/");
   };
   return (

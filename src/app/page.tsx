@@ -9,6 +9,8 @@ import { Transactions } from "@/components/pages/transactions";
 import { Goals } from "@/components/pages/goals";
 import { Reports } from "@/components/pages/reports";
 import { Settings } from "@/components/pages/settings";
+import FinanceProvider from "@/context/dashboardContext";
+import TransactionsProvider from "@/context/transactionsContext";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState("dashboard");
@@ -31,13 +33,20 @@ export default function App() {
   };
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <SidebarProvider>
-        <AppSidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
-        <SidebarInset>
-          <div className="flex flex-1 flex-col">{renderPage()}</div>
-        </SidebarInset>
-      </SidebarProvider>
-    </ThemeProvider>
+    <TransactionsProvider>
+      <FinanceProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <SidebarProvider>
+            <AppSidebar
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
+            <SidebarInset>
+              <div className="flex flex-1 flex-col">{renderPage()}</div>
+            </SidebarInset>
+          </SidebarProvider>
+        </ThemeProvider>
+      </FinanceProvider>
+    </TransactionsProvider>
   );
 }

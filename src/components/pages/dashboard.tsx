@@ -17,6 +17,7 @@ import {
 
 import { useEffect, useState } from "react";
 import apiInstance, { setAuthToken } from "../../apiInstance/apiInstance";
+import { useFinance } from "../../context/dashboardContext";
 
 const weeklyData = [
   { week: "Sem 1", ingresos: 2400, gastos: 1800 },
@@ -36,6 +37,26 @@ const goals = [
 ];
 
 export function Dashboard() {
+  const { totalIngresos, totalEgresos, actualBalance, setContextDashboard } =
+    useFinance();
+
+  useEffect(() => {
+    setAuthToken(localStorage.getItem("token"));
+    const fetchData = async () => {
+      const res1 = await apiInstance.get("/dashboard/balance");
+      const res2 = await apiInstance.get("/dashboard/ingresos");
+      const res3 = await apiInstance.get("/dashboard/gastos");
+
+      setContextDashboard(
+        res2.data.total_ingresos,
+        res3.data.total_egresos,
+        res1.data.balance
+      );
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="flex flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -55,7 +76,9 @@ export function Dashboard() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">$12,450</div>
+              <div className="text-2xl font-bold text-green-600">
+                {actualBalance}
+              </div>
               <p className="text-xs text-muted-foreground">
                 +2.5% desde el mes pasado
               </p>
@@ -70,7 +93,9 @@ export function Dashboard() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">$8,200</div>
+              <div className="text-2xl font-bold text-green-600">
+                {totalIngresos}
+              </div>
               <p className="text-xs text-muted-foreground">
                 +12% desde el mes pasado
               </p>
@@ -85,7 +110,9 @@ export function Dashboard() {
               <TrendingDown className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">$6,320</div>
+              <div className="text-2xl font-bold text-red-600">
+                {totalEgresos}
+              </div>
               <p className="text-xs text-muted-foreground">
                 -5% desde el mes pasado
               </p>
