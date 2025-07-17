@@ -142,7 +142,7 @@ export function Transactions() {
                 </div>
 
                 <div>
-                  <Label htmlFor="type">Tipo</Label>
+                  <Label htmlFor="type">Tipos</Label>
                   <Select>
                     <SelectTrigger>
                       <SelectValue />
