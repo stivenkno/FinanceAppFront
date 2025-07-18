@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,36 +18,12 @@ import { Progress } from "@/components/ui/progress";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Target, Calendar, DollarSign, Trash2 } from "lucide-react";
+import { useGoals } from "@/context/goalsContext";
 
-const initialGoals = [
-  {
-    id: 1,
-    name: "Vacaciones de verano",
-    targetAmount: 5000,
-    currentAmount: 3200,
-    deadline: "2024-06-01",
-    progress: 64,
-  },
-  {
-    id: 2,
-    name: "Fondo de emergencia",
-    targetAmount: 10000,
-    currentAmount: 7500,
-    deadline: "2024-12-31",
-    progress: 75,
-  },
-  {
-    id: 3,
-    name: "Nuevo auto",
-    targetAmount: 15000,
-    currentAmount: 4500,
-    deadline: "2025-03-01",
-    progress: 30,
-  },
-];
+import apiInstance from "@/apiInstance/apiInstance";
 
 export function Goals() {
-  const [goals, setGoals] = useState(initialGoals);
+  const { goals, setGoals } = useGoals();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState(null);
@@ -55,59 +31,66 @@ export function Goals() {
 
   const [formData, setFormData] = useState({
     name: "",
-    targetAmount: "",
+    targetamount: "",
     deadline: "",
   });
 
-  const handleCreateGoal = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newGoal = {
-      id: Date.now(),
-      name: formData.name,
-      targetAmount: Number(formData.targetAmount),
-      currentAmount: 0,
-      deadline: formData.deadline,
-      progress: 0,
-    };
-    setGoals([...goals, newGoal]);
-    setFormData({ name: "", targetAmount: "", deadline: "" });
-    setIsCreateDialogOpen(false);
-  };
-
-  const handleContribute = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (selectedGoal) {
-      const updatedGoals = goals.map((goal) => {
-        if (goal.id === selectedGoal.id) {
-          const newCurrentAmount =
-            goal.currentAmount + Number(contributeAmount);
-          const newProgress = Math.min(
-            (newCurrentAmount / goal.targetAmount) * 100,
-            100
-          );
-          return {
-            ...goal,
-            currentAmount: newCurrentAmount,
-            progress: newProgress,
-          };
-        }
-        return goal;
-      });
-      setGoals(updatedGoals);
+  const fetchGoals = async () => {
+    try {
+      const response = await apiInstance.get("/goals/getgoals");
+      setGoals(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching goals:", error);
     }
-    setContributeAmount("");
-    setSelectedGoal(null);
-    setIsContributeDialogOpen(false);
   };
 
-  const handleDeleteGoal = (id: number) => {
-    setGoals(goals.filter((goal) => goal.id !== id));
+  const createGoal = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await apiInstance.post("/goals/creategoal", formData);
+      fetchGoals();
+      console.log(response.data);
+      setIsCreateDialogOpen(false);
+    } catch (error) {
+      console.error("Error creating goal:", error);
+    }
+  };
+
+  const contributeToGoal = async (e) => {
+    e.preventDefault();
+    try {
+      console.log(selectedGoal.id);
+      console.log(typeof parseInt(contributeAmount));
+      const response = await apiInstance.put(`/goals/goal_aporte`, {
+        id: selectedGoal.id,
+        amount: parseInt(contributeAmount),
+      });
+      fetchGoals();
+      setIsContributeDialogOpen(false);
+    } catch (error) {
+      console.error("Error contributing to goal:", error);
+    }
+  };
+
+  const deleteGoal = async (id: number) => {
+    try {
+      await apiInstance.delete(`/goals/deletegoal`, { data: { id: id } });
+      fetchGoals();
+    } catch (error) {
+      console.error("Error deleting goal:", error);
+    }
   };
 
   const openContributeDialog = (goal: any) => {
     setSelectedGoal(goal);
     setIsContributeDialogOpen(true);
   };
+
+  useEffect(() => {
+    fetchGoals();
+    console.log(goals);
+  }, []);
 
   return (
     <div className="flex flex-col">
@@ -137,7 +120,7 @@ export function Goals() {
               <DialogHeader>
                 <DialogTitle>Nueva Meta Financiera</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleCreateGoal} className="space-y-4">
+              <form className="space-y-4" onSubmit={createGoal}>
                 <div>
                   <Label htmlFor="name">Nombre de la meta</Label>
                   <Input
@@ -152,14 +135,14 @@ export function Goals() {
                 </div>
 
                 <div>
-                  <Label htmlFor="targetAmount">Monto objetivo</Label>
+                  <Label htmlFor="targetamount">Monto objetivo</Label>
                   <Input
-                    id="targetAmount"
+                    id="targetamount"
                     type="number"
                     step="0.01"
-                    value={formData.targetAmount}
+                    value={formData.targetamount}
                     onChange={(e) =>
-                      setFormData({ ...formData, targetAmount: e.target.value })
+                      setFormData({ ...formData, targetamount: e.target.value })
                     }
                     placeholder="0.00"
                     required
@@ -208,7 +191,7 @@ export function Goals() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleDeleteGoal(goal.id)}
+                      onClick={() => deleteGoal(goal.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -220,7 +203,7 @@ export function Goals() {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Progreso</span>
                     <span className="font-medium">
-                      {goal.progress.toFixed(1)}%
+                      {Number(goal.progress).toFixed(2)}%
                     </span>
                   </div>
                   <Progress value={goal.progress} className="h-2" />
@@ -231,8 +214,7 @@ export function Goals() {
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Monto:</span>
                     <span className="font-medium">
-                      ${goal.currentAmount.toLocaleString()} / $
-                      {goal.targetAmount.toLocaleString()}
+                      ${goal.currentamount} / ${goal.targetamount}
                     </span>
                   </div>
 
@@ -272,7 +254,7 @@ export function Goals() {
             <DialogHeader>
               <DialogTitle>Aportar a: {selectedGoal?.name}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleContribute} className="space-y-4">
+            <form className="space-y-4" onSubmit={contributeToGoal}>
               <div>
                 <Label htmlFor="contributeAmount">Cantidad a aportar</Label>
                 <Input
@@ -289,14 +271,13 @@ export function Goals() {
               {selectedGoal && (
                 <div className="p-3 bg-muted rounded-lg text-sm">
                   <p>
-                    Progreso actual: $
-                    {selectedGoal.currentAmount.toLocaleString()} / $
-                    {selectedGoal.targetAmount.toLocaleString()}
+                    Progreso actual: ${selectedGoal.currentamount} / $
+                    {selectedGoal.targetamount}
                   </p>
                   <p>
                     Restante: $
                     {(
-                      selectedGoal.targetAmount - selectedGoal.currentAmount
+                      selectedGoal.targetamount - selectedGoal.currentamount
                     ).toLocaleString()}
                   </p>
                 </div>

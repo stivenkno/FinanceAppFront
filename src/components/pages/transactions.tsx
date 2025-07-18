@@ -1,8 +1,6 @@
 "use client";
 
-import type React from "react";
 import { useEffect, useState } from "react";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +41,13 @@ export function Transactions() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterType, setFilterType] = useState("all");
 
-  const [formData, setFormData] = useState();
+  const [formData, setFormData] = useState({
+    fecha: "",
+    type: "",
+    category: "",
+    description: "",
+    amount: "",
+  });
 
   const categories = [
     "Salario",
@@ -65,6 +69,49 @@ export function Transactions() {
     getTransactions();
   }, []);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingTransaction) {
+        // Editar
+        await apiInstance.put(`/transactions/updatetransaction`, formData);
+      } else {
+        const response = await apiInstance.post(
+          "/transactions/createtransaction",
+          formData
+        );
+        setTransactions([response.data, ...transactions]);
+        setIsDialogOpen(false);
+      }
+      await getTransactions();
+      setFormData({
+        fecha: "",
+        type: "",
+        category: "",
+        description: "",
+        amount: "",
+      });
+      setEditingTransaction(null);
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Error al guardar transacción:", error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const updatedTransactions = transactions.filter(
+        (transaction) => transaction.id !== id
+      );
+      setTransactions(updatedTransactions);
+      await apiInstance.delete(`/transactions/deletetransaction`, {
+        data: { id },
+      });
+    } catch (error) {
+      console.error("Error al eliminar la transacción:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -76,13 +123,7 @@ export function Transactions() {
       <div className="flex-1 space-y-6 p-6">
         <div className="flex flex-col sm:flex-row gap-4 justify-between">
           <div className="flex gap-2">
-            <Select
-              value={filterCategory}
-              onValueChange={(value) => {
-                console.log(value);
-                setFilterCategory(value);
-              }}
-            >
+            <Select value={filterCategory} onValueChange={setFilterCategory}>
               <SelectTrigger className="w-[180px]">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Categoría" />
@@ -97,13 +138,7 @@ export function Transactions() {
               </SelectContent>
             </Select>
 
-            <Select
-              value={filterType}
-              onValueChange={(value) => {
-                console.log(value);
-                setFilterType(value);
-              }}
-            >
+            <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
@@ -120,6 +155,13 @@ export function Transactions() {
               <Button
                 onClick={() => {
                   setEditingTransaction(null);
+                  setFormData({
+                    fecha: "",
+                    type: "",
+                    category: "",
+                    description: "",
+                    amount: "",
+                  });
                   setIsDialogOpen(true);
                 }}
               >
@@ -135,28 +177,46 @@ export function Transactions() {
                     : "Nueva Transacción"}
                 </DialogTitle>
               </DialogHeader>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div>
                   <Label htmlFor="date">Fecha</Label>
-                  <Input id="date" type="date" required />
+                  <Input
+                    id="date"
+                    type="date"
+                    value={formData.fecha}
+                    onChange={(e) =>
+                      setFormData({ ...formData, fecha: e.target.value })
+                    }
+                    required
+                  />
                 </div>
 
                 <div>
-                  <Label htmlFor="type">Tipos</Label>
-                  <Select>
+                  <Label htmlFor="type">Tipo</Label>
+                  <Select
+                    value={formData.type}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, type: value })
+                    }
+                  >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="income">Ingreso</SelectItem>
-                      <SelectItem value="expense">Gasto</SelectItem>
+                      <SelectItem value="Ingreso">Ingreso</SelectItem>
+                      <SelectItem value="Gasto">Gasto</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
                   <Label htmlFor="category">Categoría</Label>
-                  <Select>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, category: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar categoría" />
                     </SelectTrigger>
@@ -172,12 +232,27 @@ export function Transactions() {
 
                 <div>
                   <Label htmlFor="description">Descripción</Label>
-                  <Input id="description" required />
+                  <Input
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    required
+                  />
                 </div>
 
                 <div>
                   <Label htmlFor="amount">Monto</Label>
-                  <Input id="amount" type="number" step="0.01" required />
+                  <Input
+                    id="amount"
+                    type="number"
+                    value={formData.amount}
+                    onChange={(e) =>
+                      setFormData({ ...formData, amount: e.target.value })
+                    }
+                    required
+                  />
                 </div>
 
                 <div className="flex gap-2 pt-4">
@@ -220,9 +295,10 @@ export function Transactions() {
                 {transactions
                   ?.filter((tx) => {
                     const matchCategory =
-                      filterCategory === "all" || tx.category == filterCategory;
+                      filterCategory === "all" ||
+                      tx.category === filterCategory;
                     const matchType =
-                      filterType === "all" || tx.type == filterType;
+                      filterType === "all" || tx.type === filterType;
                     return matchCategory && matchType;
                   })
                   .map((tx) => (
@@ -253,8 +329,8 @@ export function Transactions() {
                           size="icon"
                           variant="ghost"
                           onClick={() => {
-                            setEditingTransaction(true);
                             setIsDialogOpen(true);
+                            setEditingTransaction(tx);
                           }}
                         >
                           <Edit className="w-4 h-4" />
@@ -263,8 +339,7 @@ export function Transactions() {
                           size="icon"
                           variant="ghost"
                           onClick={() => {
-                            console.log("Eliminar", tx.id);
-                            // Aquí puedes implementar deleteTransaction(tx.id)
+                            handleDelete(tx.id);
                           }}
                         >
                           <Trash2 className="w-4 h-4" />

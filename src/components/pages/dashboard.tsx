@@ -77,7 +77,11 @@ export function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {actualBalance}
+                {new Intl.NumberFormat("es-CO", {
+                  style: "currency",
+                  currency: "COP",
+                  minimumFractionDigits: 0,
+                }).format(actualBalance)}
               </div>
               <p className="text-xs text-muted-foreground">
                 +2.5% desde el mes pasado
@@ -94,7 +98,11 @@ export function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {totalIngresos}
+                {new Intl.NumberFormat("es-CO", {
+                  style: "currency",
+                  currency: "COP",
+                  minimumFractionDigits: 0,
+                }).format(totalIngresos)}
               </div>
               <p className="text-xs text-muted-foreground">
                 +12% desde el mes pasado
@@ -111,7 +119,11 @@ export function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {totalEgresos}
+                {new Intl.NumberFormat("es-CO", {
+                  style: "currency",
+                  currency: "COP",
+                  minimumFractionDigits: 0,
+                }).format(totalEgresos)}
               </div>
               <p className="text-xs text-muted-foreground">
                 -5% desde el mes pasado

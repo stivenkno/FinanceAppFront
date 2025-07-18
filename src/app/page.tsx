@@ -11,6 +11,7 @@ import { Reports } from "@/components/pages/reports";
 import { Settings } from "@/components/pages/settings";
 import FinanceProvider from "@/context/dashboardContext";
 import TransactionsProvider from "@/context/transactionsContext";
+import { GoalsProvider } from "@/context/goalsContext";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState("dashboard");
@@ -34,19 +35,21 @@ export default function App() {
 
   return (
     <TransactionsProvider>
-      <FinanceProvider>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SidebarProvider>
-            <AppSidebar
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-            />
-            <SidebarInset>
-              <div className="flex flex-1 flex-col">{renderPage()}</div>
-            </SidebarInset>
-          </SidebarProvider>
-        </ThemeProvider>
-      </FinanceProvider>
+      <GoalsProvider>
+        <FinanceProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <SidebarProvider>
+              <AppSidebar
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+              />
+              <SidebarInset>
+                <div className="flex flex-1 flex-col">{renderPage()}</div>
+              </SidebarInset>
+            </SidebarProvider>
+          </ThemeProvider>
+        </FinanceProvider>
+      </GoalsProvider>
     </TransactionsProvider>
   );
 }
