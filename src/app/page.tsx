@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -12,6 +12,7 @@ import { Settings } from "@/components/pages/settings";
 import FinanceProvider from "@/context/dashboardContext";
 import TransactionsProvider from "@/context/transactionsContext";
 import { GoalsProvider } from "@/context/goalsContext";
+import { redirect } from "next/navigation";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState("dashboard");
@@ -32,6 +33,14 @@ export default function App() {
         return <Dashboard />;
     }
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      redirect("/login");
+    }
+  }, []);
 
   return (
     <TransactionsProvider>
