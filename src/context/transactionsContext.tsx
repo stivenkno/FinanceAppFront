@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 
 // Tipo para una transacción individual
 export type Transaction = {
@@ -34,7 +28,7 @@ const TransactionsContext = createContext<TransactionsContextType>({
 // Provider
 export const TransactionsProvider = ({ children }: { children: ReactNode }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading] = useState<boolean>(true);
 
   return (
     <TransactionsContext.Provider

@@ -27,9 +27,6 @@ export function LoginForm({
     password: "",
   });
 
-  const { totalIngresos, totalEgresos, actualBalance, setContextDashboard } =
-    useFinance();
-
   const fetchFinanceData = async () => {
     try {
       const response1 = await apiInstance.get("/dashboard/balance");

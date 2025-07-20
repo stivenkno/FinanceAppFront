@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from "recharts";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import apiInstance, { setAuthToken } from "../../apiInstance/apiInstance";
 import { useFinance } from "../../context/dashboardContext";
 

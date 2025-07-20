@@ -82,7 +82,7 @@ export function Goals() {
     }
   };
 
-  const openContributeDialog = (goal: any) => {
+  const openContributeDialog = (goal) => {
     setSelectedGoal(goal);
     setIsContributeDialogOpen(true);
   };
