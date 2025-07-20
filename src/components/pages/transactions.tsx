@@ -42,11 +42,12 @@ export function Transactions() {
   const [filterType, setFilterType] = useState("all");
 
   const [formData, setFormData] = useState({
+    id: 0, // ✅ Agregado
     fecha: "",
     type: "",
     category: "",
     description: "",
-    amount: "",
+    amount: 0,
   });
 
   const categories = [
@@ -73,18 +74,22 @@ export function Transactions() {
     e.preventDefault();
     try {
       if (editingTransaction) {
-        // Editar
-        await apiInstance.put(`/transactions/updatetransaction`, formData);
+        // Editar transacción
+        await apiInstance.put("/transactions/updatetransaction", formData);
       } else {
+        // Crear transacción
         const response = await apiInstance.post(
           "/transactions/createtransaction",
           formData
         );
         setTransactions([response.data, ...transactions]);
-        setIsDialogOpen(false);
       }
+
       await getTransactions();
+
+      // Resetear
       setFormData({
+        id: "",
         fecha: "",
         type: "",
         category: "",
@@ -156,6 +161,7 @@ export function Transactions() {
                 onClick={() => {
                   setEditingTransaction(null);
                   setFormData({
+                    id: "",
                     fecha: "",
                     type: "",
                     category: "",
@@ -264,6 +270,14 @@ export function Transactions() {
                     variant="outline"
                     onClick={() => {
                       setEditingTransaction(null);
+                      setFormData({
+                        id: "",
+                        fecha: "",
+                        type: "",
+                        category: "",
+                        description: "",
+                        amount: "",
+                      });
                       setIsDialogOpen(false);
                     }}
                   >
@@ -314,7 +328,7 @@ export function Transactions() {
                             tx.type === "Ingreso" ? "default" : "destructive"
                           }
                         >
-                          {tx.type === "Ingreso" ? "Ingreso" : "Gasto"}
+                          {tx.type}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -331,6 +345,14 @@ export function Transactions() {
                           onClick={() => {
                             setIsDialogOpen(true);
                             setEditingTransaction(tx);
+                            setFormData({
+                              id: tx.id, // ✅ Muy importante
+                              fecha: tx.fecha,
+                              type: tx.type,
+                              category: tx.category,
+                              description: tx.description,
+                              amount: tx.amount,
+                            });
                           }}
                         >
                           <Edit className="w-4 h-4" />
