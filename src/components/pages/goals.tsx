@@ -57,15 +57,29 @@ export function Goals() {
     }
   };
 
-  const contributeToGoal = async (e) => {
+  const contributeToGoal = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!(selectedGoal as any).id) {
+      console.error("No hay objetivo seleccionado.");
+      return;
+    }
+
+    const amount = parseInt(contributeAmount);
+    if (isNaN(amount)) {
+      console.error("El monto ingresado no es válido.");
+      return;
+    }
+
     try {
-      console.log(selectedGoal.id);
-      console.log(typeof parseInt(contributeAmount));
+      console.log("ID objetivo:", (selectedGoal as any).id);
+      console.log("Tipo de amount:", typeof amount);
+
       await apiInstance.put(`/goals/goal_aporte`, {
-        id: selectedGoal.id,
-        amount: parseInt(contributeAmount),
+        id: (selectedGoal as any).id,
+        amount,
       });
+
       fetchGoals();
       setIsContributeDialogOpen(false);
     } catch (error) {
@@ -252,7 +266,7 @@ export function Goals() {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Aportar a: {selectedGoal?.name}</DialogTitle>
+              <DialogTitle>Aportar a: {(selectedGoal as any).name}</DialogTitle>
             </DialogHeader>
             <form className="space-y-4" onSubmit={contributeToGoal}>
               <div>
@@ -271,13 +285,14 @@ export function Goals() {
               {selectedGoal && (
                 <div className="p-3 bg-muted rounded-lg text-sm">
                   <p>
-                    Progreso actual: ${selectedGoal.currentamount} / $
-                    {selectedGoal.targetamount}
+                    Progreso actual: ${(selectedGoal as any).currentamount} / $
+                    {(selectedGoal as any).targetamount}
                   </p>
                   <p>
                     Restante: $
                     {(
-                      selectedGoal.targetamount - selectedGoal.currentamount
+                      (selectedGoal as any).targetamount -
+                      (selectedGoal as any).currentamount
                     ).toLocaleString()}
                   </p>
                 </div>

@@ -38,7 +38,7 @@ import { get } from "http";
 export function Transactions() {
   const { transactions, setTransactions } = useTransactions();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [editingTransaction, setEditingTransaction]: any = useState(null);
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterType, setFilterType] = useState("all");
 
@@ -256,7 +256,10 @@ export function Transactions() {
                     type="number"
                     value={formData.amount}
                     onChange={(e) =>
-                      setFormData({ ...formData, amount: e.target.value })
+                      setFormData({
+                        ...formData,
+                        amount: parseInt(e.target.value),
+                      })
                     }
                     required
                   />
