@@ -55,7 +55,7 @@ export function Dashboard() {
     };
 
     fetchData();
-  }, []);
+  }, [setContextDashboard]);
 
   return (
     <div className="flex flex-col">

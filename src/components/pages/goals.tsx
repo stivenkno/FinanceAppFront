@@ -62,7 +62,7 @@ export function Goals() {
     try {
       console.log(selectedGoal.id);
       console.log(typeof parseInt(contributeAmount));
-      const response = await apiInstance.put(`/goals/goal_aporte`, {
+      await apiInstance.put(`/goals/goal_aporte`, {
         id: selectedGoal.id,
         amount: parseInt(contributeAmount),
       });
@@ -90,7 +90,7 @@ export function Goals() {
   useEffect(() => {
     fetchGoals();
     console.log(goals);
-  }, []);
+  });
 
   return (
     <div className="flex flex-col">

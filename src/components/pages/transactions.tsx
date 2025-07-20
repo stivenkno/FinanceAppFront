@@ -33,6 +33,7 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, Edit, Trash2, Filter } from "lucide-react";
 import { useTransactions } from "@/context/transactionsContext";
 import apiInstance from "@/apiInstance/apiInstance";
+import { get } from "http";
 
 export function Transactions() {
   const { transactions, setTransactions } = useTransactions();
@@ -68,7 +69,7 @@ export function Transactions() {
 
   useEffect(() => {
     getTransactions();
-  }, []);
+  }, [getTransactions]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -89,12 +90,12 @@ export function Transactions() {
 
       // Resetear
       setFormData({
-        id: "",
+        id: 0,
         fecha: "",
         type: "",
         category: "",
         description: "",
-        amount: "",
+        amount: 0,
       });
       setEditingTransaction(null);
       setIsDialogOpen(false);
@@ -161,12 +162,12 @@ export function Transactions() {
                 onClick={() => {
                   setEditingTransaction(null);
                   setFormData({
-                    id: "",
+                    id: 0,
                     fecha: "",
                     type: "",
                     category: "",
                     description: "",
-                    amount: "",
+                    amount: 0,
                   });
                   setIsDialogOpen(true);
                 }}
@@ -271,12 +272,12 @@ export function Transactions() {
                     onClick={() => {
                       setEditingTransaction(null);
                       setFormData({
-                        id: "",
+                        id: 0,
                         fecha: "",
                         type: "",
                         category: "",
                         description: "",
-                        amount: "",
+                        amount: 0,
                       });
                       setIsDialogOpen(false);
                     }}
