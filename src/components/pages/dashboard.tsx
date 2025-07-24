@@ -18,6 +18,7 @@ import {
 import { useEffect } from "react";
 import apiInstance, { setAuthToken } from "../../apiInstance/apiInstance";
 import { useFinance } from "../../context/dashboardContext";
+import { useGoals } from "../../context/goalsContext";
 
 const weeklyData = [
   { week: "Sem 1", ingresos: 2400, gastos: 1800 },
@@ -30,15 +31,11 @@ const weeklyData = [
   { week: "Sem 4", ingresos: 2800, gastos: 2400 },
 ];
 
-const goals = [
-  { name: "Vacaciones", target: 5000, current: 3200, progress: 64 },
-  { name: "Fondo de emergencia", target: 10000, current: 7500, progress: 75 },
-  { name: "Nuevo auto", target: 15000, current: 4500, progress: 30 },
-];
-
 export function Dashboard() {
   const { totalIngresos, totalEgresos, actualBalance, setContextDashboard } =
     useFinance();
+
+  const { goals, setGoals } = useGoals();
 
   useEffect(() => {
     setAuthToken(localStorage.getItem("token"));
@@ -46,6 +43,10 @@ export function Dashboard() {
       const res1 = await apiInstance.get("/dashboard/balance");
       const res2 = await apiInstance.get("/dashboard/ingresos");
       const res3 = await apiInstance.get("/dashboard/gastos");
+
+      const resgoals = await apiInstance.get("/goals/getgoals");
+      setGoals(resgoals.data);
+      console.log(resgoals.data);
 
       setContextDashboard(
         res2.data.total_ingresos,
@@ -176,8 +177,7 @@ export function Dashboard() {
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">{goal.name}</span>
                     <span className="text-muted-foreground">
-                      ${goal.current.toLocaleString()} / $
-                      {goal.target.toLocaleString()}
+                      ${goal.currentamount} / ${goal.targetamount}
                     </span>
                   </div>
                   <Progress value={goal.progress} className="h-2" />
