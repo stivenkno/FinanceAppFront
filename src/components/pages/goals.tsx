@@ -60,7 +60,7 @@ export function Goals() {
   const contributeToGoal = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!(selectedGoal as any).id) {
+    if (!selectedGoal?.id) {
       console.error("No hay objetivo seleccionado.");
       return;
     }
@@ -72,11 +72,11 @@ export function Goals() {
     }
 
     try {
-      console.log("ID objetivo:", (selectedGoal as any).id);
+      console.log("ID objetivo:", selectedGoal.id);
       console.log("Tipo de amount:", typeof amount);
 
       await apiInstance.put(`/goals/goal_aporte`, {
-        id: (selectedGoal as any).id,
+        id: selectedGoal.id,
         amount,
       });
 
@@ -104,7 +104,7 @@ export function Goals() {
   useEffect(() => {
     fetchGoals();
     console.log(goals);
-  });
+  }, []);
 
   return (
     <div className="flex flex-col">
@@ -266,7 +266,7 @@ export function Goals() {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Aportar a: {(selectedGoal as any).name}</DialogTitle>
+              <DialogTitle>Aportar a: {selectedGoal?.name}</DialogTitle>
             </DialogHeader>
             <form className="space-y-4" onSubmit={contributeToGoal}>
               <div>
@@ -285,14 +285,13 @@ export function Goals() {
               {selectedGoal && (
                 <div className="p-3 bg-muted rounded-lg text-sm">
                   <p>
-                    Progreso actual: ${(selectedGoal as any).currentamount} / $
-                    {(selectedGoal as any).targetamount}
+                    Progreso actual: ${selectedGoal.currentamount} / $
+                    {selectedGoal.targetamount}
                   </p>
                   <p>
                     Restante: $
                     {(
-                      (selectedGoal as any).targetamount -
-                      (selectedGoal as any).currentamount
+                      selectedGoal.targetamount - selectedGoal.currentamount
                     ).toLocaleString()}
                   </p>
                 </div>
