@@ -26,7 +26,7 @@ export function Goals() {
   const { goals, setGoals } = useGoals();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
-  const [selectedGoal, setSelectedGoal] = useState(null);
+  const [selectedGoal, setSelectedGoal]: any = useState(null);
   const [contributeAmount, setContributeAmount] = useState("");
 
   const [formData, setFormData] = useState({
